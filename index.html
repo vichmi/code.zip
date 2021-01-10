@@ -16,7 +16,7 @@
     <canvas id="canvas" width="800" height="600"></canvas>
     <script>
         let isFullscreen = false;
-        let stroke_ = false, c = 'black', noLoop = false;
+        let stroke_ = false, c = 'black', noLoop_ = false;
 
         function disctance(x1, y1, x2, y2) {
             let x = x1 - x2;
@@ -95,11 +95,24 @@
             }
         }
 
-        onresize = () => {
-            if(isFullscreen) setFullScreen();
+        function noLoop() {
+            noLoop_ = true;
         }
 
+        function translate(x, y) {context.translate(x, y);}
+
+        function rotate(a) {context.rotate(a);}
+
+        function save() {context.save();}
+
+        function restore() {context.restore();}
+
+        function scale(x, y) {context.scale(x, y);}
+
+        onresize = () => {if(isFullscreen) setFullScreen();}
+
     </script>
+    
     <script src="game.js"></script>
 
     <script>
@@ -109,19 +122,16 @@
         let mouseX = mouseY = 0;
 
         let callupdates = 10;
-        let fps = 1;
         const reqAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame || function (callback) {
-				setTimeout(callback, 1000 / fps);
+				setTimeout(callback, 1000 / 30);
 		};
 
         function _draw() {
-            if(typeof _draw === 'function') {
-                setTimeout( () => {
-                    context.clearRect(0, 0, canvas.width, canvas.height);
-                    draw();
-                }, 1000 / fps);
+            if(typeof draw === 'function') {
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                draw();
             }
-            if(noLoop == false) reqAnimationFrame(_draw);
+            if(noLoop_ == false) reqAnimationFrame(_draw);
         }
 
         function _update() {
@@ -174,6 +184,7 @@
         function _setup() {
             reqAnimationFrame(_draw);
             setInterval(_update, callupdates);
+
             if(typeof setup === "function") {
                 setup();
             }
