@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body onload="_setup();">
+    <canvas id="canvas" width="800" height="600"></canvas>
+    <script>
+        let isFullscreen = false;
+
+        function calculateDistance(x1, y1, x2, y2) {
+            let x = x1 - x2;
+            let y = y1 - y2;
+            return Math.sqrt( x*x + y*y );
+        }
+
+        function areColliding(x1, y1, w1, h1, x2, y2, w2, h2) {
+            if(x2 <= x1+w1 && x1 <= x2+w2 && y2 <= y1+h1 && y1 <= y2+h2) {
+                return 1;
+            }
+            return 0;
+        }
+
+        function areCircleColliding(x1, y1, r1, x2, y2, r2) {
+            if(calculateDistance(x1, y1, x2, y2) < r1+r2) {
+                return 1;
+            }
+            return 0;
+        }
+
+        function randomInt(min, max) {
+            if(typeof min === 'undefined' && typeof max === 'undefined') {
+                return Math.random();
+            }
+            if(typeof max === 'undefined') {
+                return Math.random()*min;
+            }else{
+                return min+Math.random()*(max-min);
+            }
+        }
+
+        function drawLine(x1, y1, x2, y2) {
+            context.beginPath();
+            context.moveTo(x1, y1);
+            context.lineTo(x2, y2);
+            context.stroke();
+        }
+
+        function drawCircle(x, y, r, isFill = true) {
+            context.beginPath();
+            context.arc(x, y, r, 0, 2*Math.PI);
+            isFill ? context.fill() : context.stroke();
+        }
+
+        function setCanvasSize(w, h) {
+            canvas.width = w;
+            canvas.height = h;
+        }
+
+        function setFullScreen() {
+            isFullscreen = true;
+            setCanvasSize(innerWidth, innerHeight);
+        }
+
+        onresize = () => {if(isFullscreen) setFullScreen();}
+
+    </script>
+    
+    <script src="game.js"></script>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+
+        let mouseX = mouseY = 0;
+
+        let callupdates = 10;
+        const reqAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame || function (callback) {
+				setTimeout(callback, 1000 / 30);
+		};
+
+        function _draw() {
+            if(typeof draw === 'function') {
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                draw();
+            }
+            reqAnimationFrame(_draw);
+        }
+
+        function _update() {
+            if (typeof update === 'function') {
+                update();
+            }
+        }
+ 
+        // Mouse events
+        window.addEventListener('mouseup', e => {
+            if(e.target !== document.getElementById('canvas')) return;
+            if(typeof mouseup === 'function') {
+                mouseX = e.offsetX;
+                mouseY = e.offsetY;
+                mouseup();
+            }
+        });
+
+        window.addEventListener('mousedown', e => {
+            if(e.target !== document.getElementById('canvas')) return;
+            if(typeof mousedown === 'function') {
+                mouseX = e.offsetX;
+                mouseY = e.offsetY;
+                mousedown();
+            }
+        });
+
+        window.addEventListener('mousemove', e => {
+            if(e.target !== document.getElementById('canvas')) return;
+            if(typeof mousemove === 'function') {
+                mouseX = e.offsetX;
+                mouseY = e.offsetY;
+                mousemove();
+            }
+        });
+
+        let isKeyPressedCodes = Array.from({length: 256}, () => 0);
+        function isKeyPressed(key) {
+            if(isKeyPressedCodes[key.toUpperCase().charCodeAt(0)]) return 1;
+            return 0;
+        }
+        
+        // Keyboard Events
+        window.addEventListener('keyup', e => {
+            isKeyPressedCodes[e.keyCode] = 0;
+            if(typeof keyup === 'function') {
+                keyup(e.key);
+            }
+        });
+
+        window.addEventListener('keydown', e => {
+            isKeyPressedCodes[e.keyCode] = 1;
+            if(typeof keydown === 'function') {
+                keydown(e.key);
+            }
+        });
+
+
+        // Startup functions
+        function _setup() {
+            reqAnimationFrame(_draw);
+            setInterval(_update, callupdates);
+
+            if(typeof setup === "function") {
+                setup();
+            }
+        }
+    </script>
+</body>
+
+</html>
